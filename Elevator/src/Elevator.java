@@ -8,12 +8,14 @@ public class Elevator extends Thread{
 	public Image imageClosed;
 	
 	int direction = 1;
-	float speed = 300.0f;
+	float speed = 500.0f;
 	private static boolean door = true;
 	
 	Floor[] floor;
 	int floorCurrent = 0;
 	int floorDestiny = 1;
+	
+	Person person;
 	
 	public Elevator(Floor[] floor)
 	{
@@ -27,6 +29,12 @@ public class Elevator extends Thread{
 	public void run() 
 	{
 		
+		try {
+			sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		float gameTime = 0;
 		while(rodando) 
@@ -45,46 +53,121 @@ public class Elevator extends Thread{
 		
 	}
 	
-	public void Update(float gameTime) 
+	private void Update(float gameTime) 
 	{
 		
 		if(door == true)
 		{
-			if(( floor[floorDestiny].positionY - floor[floorCurrent].positionY) > 0 && floor[floorDestiny].positionY - imageOpen.positionY > 10)
-			{
-				imageOpen.positionY +=  speed * direction * gameTime;
-				imageOpen.positionX = 0;
-				imageClosed.positionX = -1000;
-			}else {
-				//imageOpen.positionY -=  speed * direction * gameTime;
-				//imageOpen.positionX = 0;
-				//imageClosed.positionX = -1000;
-			}
+			SetAnimation(0,-1000);
 			
-		}else {
-			imageClosed.positionY -= (floor[floorCurrent].positionY - floor[floorDestiny].positionY) - speed * direction * gameTime;
-			imageOpen.positionX = -1000;
-			imageClosed.positionX = 0;
+			
+			if(person != null)
+			{
+				if(person.floorDestiny == floorCurrent && person.image.positionY == this.imageOpen.positionY)
+				{
+					person.image.positionY = imageClosed.positionY;
+					person.image.UpdateImage();
+					person.free = false;
+					person.semaphore.release();
+					
+				}else {
+					if(this.person.free == true)
+					{
+						floorDestiny = person.floorDestiny;
+						FecharPorta();
+					}else {
+						person.semaphore.release();
+					}
+				}
+			}
+		}else 
+		{
+			
+			if( Distance(floor[floorDestiny].positionY , floor[floorCurrent].positionY) > 0 && Distance(floor[floorDestiny].positionY , (int)imageClosed.positionY) > 10)
+			{
+				if(person != null) {
+					VisitarAndar(gameTime);
+					
+				}
+					
+				
+			}else 
+			{
+				AbrirPorta();
+			}
 		}
 		
 		
 	}
-	public void Draw() 
+	
+	private void Draw() 
 	{
 		imageOpen.UpdateImage();
 		imageClosed.UpdateImage();
 	}
 	
-	public void SetOpenDoor(boolean open)
+	
+	
+	private int Distance(int destiny, int current)
 	{
-		door = open;
+		int distance = Math.abs(destiny - current);
+		return distance;
 	}
-	public static boolean GetOpenDoor()
+	
+	private void SetAnimation(int open, int closed)
 	{
-		return door;
+		imageOpen.positionX = open;
+		imageClosed.positionX = closed;
 	}
 	
+	private void AbrirPorta()
+	{
+		door = true;
+		floorCurrent = floorDestiny;
+		
+	}
+	private void FecharPorta()
+	{
+		door = false;
+	}
+	private void VisitarAndar(float gameTime)
+	{
+		if(imageClosed.positionY < floor[floorDestiny].positionY) 
+		{
+			imageClosed.positionY += speed * direction * gameTime;
+			imageOpen.positionY +=  speed * direction * gameTime;
+			
+			
+			if(person.floorDestiny == floorDestiny)
+			{
+				person.image.positionY = imageClosed.positionY;
+				person.image.UpdateImage();
+			}
+			
+		}else 
+		{
+			imageClosed.positionY -= speed * direction * gameTime;
+			imageOpen.positionY -=  speed * direction * gameTime;
+			
+			if(person.floorDestiny == floorDestiny)
+			{
+				person.image.positionY = imageClosed.positionY;
+				person.image.UpdateImage();
+			}
+			
+		}
+		SetAnimation(-1000,0);
+	}
 	
-	
+	public void ChangeDestiny(Person person)
+	{
+		if(door == true)
+		{
+			this.person = person;
+			System.out.println("Person: "+ person.id + "FloorDestiny: " + person.floorDestiny);
+			floorDestiny = this.person.floor.numberFloor;
+			FecharPorta();
+		}
+	}
 	
 }

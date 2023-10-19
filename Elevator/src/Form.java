@@ -2,6 +2,7 @@
 
 import java.awt.Color;
 import java.awt.Point;
+import java.util.Random;
 
 import javax.swing.JFrame;
 
@@ -12,15 +13,18 @@ public class Form extends GameLoop{
 	
 	Elevator elevator;
 	Floor[] floor;
-	
+	Person[] person;
 	int totalFloor;
 	
+	Random random;
 	
 	public void Start() 
 	{
+		random = new Random();
+		
 		screen = new Point(700,700);
 		
-		totalFloor = 2;
+		totalFloor = 4;
 		
 		floor = new Floor[totalFloor];
 		
@@ -28,15 +32,29 @@ public class Form extends GameLoop{
 		for(int i = 0; i < floor.length ; i++)
 		{
 			floor[i] = new Floor(i,(screen.y/totalFloor) * i);
-			System.out.println(floor[i].id + " : "+ floor[i].positionY);
+			System.out.println(floor[i].numberFloor + " : "+ floor[i].positionY);
 		}
+		
+		
 		
 		elevator = new Elevator(floor);
 		elevator.start();
 		
+
+		person = new Person[totalFloor];
 		
+		for(int i = 0; i < person.length ; i++)
+		{
+			person[i] = new Person(i,random.nextInt(totalFloor),floor[i],elevator);
+			person[i].start();
+			System.out.println(person[i].floorDestiny);
+		}
 		
 		CreateWindow();
+		
+		
+		
+		
 		
 	}
 	public void Update(float gameTime) 
@@ -46,10 +64,6 @@ public class Form extends GameLoop{
 	public void Draw() 
 	{
 		
-		for(int i = 0; i < floor.length ; i++)
-		{
-			floor[i].image.UpdateImage();
-		}
 		
 	}
 	private void CreateWindow() 
@@ -66,6 +80,11 @@ public class Form extends GameLoop{
 		for(int i = 0; i < floor.length ; i++)
 		{
 			window.add(floor[i].image.GetImage());
+		}
+		
+		for(int i = 0; i < person.length ; i++)
+		{
+			window.add(person[i].image.GetImage());
 		}
 		
 		window.setVisible(true);

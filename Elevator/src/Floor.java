@@ -1,18 +1,18 @@
 
 public class Floor {
 	
-	int id;
-	int positionY;
-	Image image;
+	public int numberFloor;
+	protected int positionY;
+	protected Image image;
 	
-	public Floor(int id, int positionY) {
-		this.id = id;
+	public Floor(int numberFloor, int positionY) {
+		this.numberFloor = numberFloor;
 		this.positionY = positionY;
 		image = new Image(0,this.positionY,Form.screen.x,10, "Image/Floor.png");
 	}
 	
 	public int GetFloor()
 	{
-		return id;
+		return numberFloor;
 	}
 }
