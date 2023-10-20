@@ -6,25 +6,22 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 
-public class Form extends GameLoop{
+public class Form{
 	
 	public static JFrame window;
-	public static Point screen;
+	public static Point screen = new Point(700,700);
 	
 	Elevator elevator;
 	Floor[] floor;
 	Person[] person;
-	int totalFloor;
+	int totalFloor = 2;
 	
-	Random random;
+	Random random = new Random();
 	
-	public void Start() 
-	{
-		random = new Random();
+	public Form() {
 		
-		screen = new Point(700,700);
 		
-		totalFloor = 4;
+		
 		
 		floor = new Floor[totalFloor];
 		
@@ -52,20 +49,10 @@ public class Form extends GameLoop{
 		
 		CreateWindow();
 		
-		
-		
-		
-		
 	}
-	public void Update(float gameTime) 
-	{
-		
-	}
-	public void Draw() 
-	{
-		
-		
-	}
+	
+	
+	
 	private void CreateWindow() 
 	{
 		window = new JFrame();

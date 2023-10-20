@@ -4,7 +4,7 @@ public class Person extends Thread{
 	
 	public boolean rodando = true;
 	
-	Image image;
+	public Image image;
 	public Floor floor;
 	Elevator elevator;
 	public int floorDestiny;
@@ -20,7 +20,7 @@ public class Person extends Thread{
 		this.floorDestiny = floorDestiny;
 		this.elevator = elevator;
 		
-		image = new Image(40,this.floor.positionY,100,100,"Image/Floor.png");
+		image = new Image(40,this.floor.positionY,64,64,"Image/Person.png");
 		
 	}
 	
@@ -48,26 +48,38 @@ public class Person extends Thread{
 	{
 		
 		
+		
 		if(free == false) {
-			image.positionX += 200.0f * gameTime;
+			
+			this.image.positionX += 300.0f * gameTime;
 			image.UpdateImage();
-		}else
-		{
-			try {
-				semaphore.acquire();
-				elevator.ChangeDestiny(this);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			
+			if(this.image.positionX > 300 )
+			{
+				
+				System.out.println("Person XAAAUUU: "+ id + " Position: "+ image.positionX);
+				rodando = false;
+				
+			}else {
+				
+				
 			}
 			
+		}else {
+			
+			try {
+				semaphore.acquire();
+			} catch (InterruptedException e) {
+				
+				e.printStackTrace();
+			}
+			elevator.ChangeDestiny(this);
+			
 			
 		}
-		if(image.positionX > 300)
-		{
-			System.out.println("Person XAAAUUU: "+ id);
-			rodando = false;
-		}
+		
+		
+		
 		
 		
 		
