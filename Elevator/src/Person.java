@@ -4,7 +4,7 @@ public class Person extends Thread{
 	
 	public boolean rodando = true;
 	
-	public Image image;
+	public Rect rect;
 	public Floor floor;
 	Elevator elevator;
 	public int floorDestiny;
@@ -20,7 +20,7 @@ public class Person extends Thread{
 		this.floorDestiny = floorDestiny;
 		this.elevator = elevator;
 		
-		image = new Image(40,this.floor.positionY,64,64,"Image/Person.png");
+		rect = new Rect(40 * id,this.floor.positionY,64,64);
 		
 	}
 	
@@ -51,13 +51,13 @@ public class Person extends Thread{
 		
 		if(free == false) {
 			
-			this.image.positionX += 300.0f * gameTime;
-			image.UpdateImage();
+			this.rect.x += 100.0f * gameTime;
 			
-			if(this.image.positionX > 300 )
+			
+			if(this.rect.x > 300.0f )
 			{
 				
-				System.out.println("Person XAAAUUU: "+ id + " Position: "+ image.positionX);
+				System.out.println("Person XAAAUUU: "+ id + " Position: "+ this.rect.x);
 				rodando = false;
 				
 			}else {
@@ -85,7 +85,7 @@ public class Person extends Thread{
 		
 	}
 	private void Draw() {
-		image.UpdateImage();
+		//Form.Paint(rect);
 	}
 	
 	public boolean GetFree()

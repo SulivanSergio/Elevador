@@ -4,11 +4,11 @@ public class Elevator extends Thread{
 	
 	public boolean rodando = true;
 	
-	public Image imageOpen;
-	public Image imageClosed;
+	public Rect rectOpen;
+	public Rect rectClosed;
 	
 
-	float speed = 500.0f;
+	float speed = 800.0f;
 	private static boolean door = false;
 	
 	Floor[] floor;
@@ -20,8 +20,8 @@ public class Elevator extends Thread{
 	
 	public Elevator(Floor[] floor)
 	{
-		imageOpen = new Image(0,0,100,200,"Image/ELevador_Aberto.png");
-		imageClosed = new Image(0,0,100,200,"Image/Elevador_Fechado.png");
+		rectOpen = new Rect(0,0,100,200);
+		rectClosed = new Rect(0,0,100,200);
 		
 		this.floor = floor;
 		
@@ -56,6 +56,8 @@ public class Elevator extends Thread{
 		{
 			SetAnimation(0,-1000);
 			
+			
+			
 		}else 
 		{
 			SetAnimation(-1000,0);
@@ -67,8 +69,8 @@ public class Elevator extends Thread{
 	
 	private void Draw() 
 	{
-		imageOpen.UpdateImage();
-		imageClosed.UpdateImage();
+		//Form.Paint(rectOpen);
+		//Form.Paint(rectClosed);
 	}
 	
 	
@@ -81,21 +83,30 @@ public class Elevator extends Thread{
 	
 	private void SetAnimation(int open, int closed)
 	{
-		imageOpen.positionX = open;
-		imageClosed.positionX = closed;
+		rectOpen.x = open;
+		rectClosed.x = closed;
 	}
 	
 
 	
 	public void ChangeDestiny(Person person)
 	{
-		
-		
-		this.person = person;
-		System.out.println("Person: "+ person.id + "FloorDestiny: " + person.floorDestiny);
-		floorDestiny = this.person.floor.numberFloor;
-		FecharPorta();
-		
+		if(this.person == null)
+		{
+			this.person = person;
+			System.out.println("Person: "+ person.id + "FloorDestiny: " + person.floorDestiny);
+			floorDestiny = this.person.floor.numberFloor;
+			FecharPorta();
+		}else if(this.person != person)
+		{
+			this.person = person;
+			System.out.println("Person: "+ person.id + "FloorDestiny: " + person.floorDestiny);
+			floorDestiny = this.person.floor.numberFloor;
+			FecharPorta();
+		}else {
+			System.out.println("REPETIDO" );
+			this.person.semaphore.release();
+		}
 	}
 	
 	private void AbrirPorta()
@@ -113,9 +124,10 @@ public class Elevator extends Thread{
 				
 				existPerson = false;
 				person.free = false;
-				person.image.positionX = 40.0f;
-				person.image.UpdateImage();
+				person.rect.x = 40.0f;
+				person.rect.y = this.rectClosed.y;
 				person.semaphore.release();
+				
 				System.out.println("Release: " + person.free + " Id: "+ person.id);
 				
 			}else {
@@ -123,6 +135,7 @@ public class Elevator extends Thread{
 				{
 					floorDestiny = person.floorDestiny;
 					existPerson = true;
+					person.rect.x = -100;
 					FecharPorta();
 				}
 			}
@@ -137,40 +150,18 @@ public class Elevator extends Thread{
 	}
 	private void VistarAndar(float gameTime)
 	{
-		if( Distance(floor[floorDestiny].positionY , floor[floorCurrent].positionY) > 0 && Distance(floor[floorDestiny].positionY , (int)imageClosed.positionY) > 10 && person.free == true)
+		if( Distance(floor[floorDestiny].positionY , floor[floorCurrent].positionY) > 0 && Distance(floor[floorDestiny].positionY , (int)rectClosed.y) > 10 && person.free == true)
 		{
 			
-				if(imageClosed.positionY < floor[floorDestiny].positionY) 
+				if(rectClosed.y < floor[floorDestiny].positionY) 
 				{
-					imageClosed.positionY += speed  * gameTime;
-					imageOpen.positionY +=  speed  * gameTime;
+					rectClosed.y += speed  * gameTime;
+					rectOpen.y +=  speed  * gameTime;
 					
-					
-					if(this.person!= null )
-					{
-						if(this.person.floorDestiny == this.floorDestiny )
-						{
-							this.person.image.positionY = imageClosed.positionY;
-							this.person.image.positionX = 40.0f;
-							this.person.image.UpdateImage();
-						}
-					}
-				
 				}else 
 				{
-					imageClosed.positionY -= speed  * gameTime;
-					imageOpen.positionY -=  speed  * gameTime;
-					
-					if(this.person!= null )
-					{
-						if(this.person.floorDestiny == this.floorDestiny)
-						{
-							this.person.image.positionY = imageClosed.positionY;
-							this.person.image.positionX = 40.0f;
-							this.person.image.UpdateImage();
-						}
-					}
-				
+					rectClosed.y -= speed  * gameTime;
+					rectOpen.y -=  speed  * gameTime;
 					
 				}
 		}else 
