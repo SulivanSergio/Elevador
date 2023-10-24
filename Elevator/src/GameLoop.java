@@ -1,19 +1,13 @@
 public class GameLoop {
 	
-	
 	public static boolean rodando = true;
-	
 	int FPS_TOTAL = 30;
 	public static int FPS =0;
-	float contTime = 0;
-	
 	
 	public GameLoop() {
 		Start();
 		Loop();
 	}
-	
-		
 	public void Loop() {
 		
 		float gameTime = 0;
@@ -21,15 +15,11 @@ public class GameLoop {
 			
 			long inicio = System.currentTimeMillis();
 			
-				
-			Input();
 			Update(gameTime);
 			Draw();
 			
 			long fim = System.currentTimeMillis();
 			gameTime = (float)(fim - inicio)* 0.001f;
-			
-			
 			
 		}
 	}
@@ -38,10 +28,7 @@ public class GameLoop {
 		
 		
 	}
-	public void Input() {
-		
-	}
-	
+
 	public void Update(float gameTime) {
 		
 	}

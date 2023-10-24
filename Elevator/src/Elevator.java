@@ -1,174 +1,151 @@
+import java.util.concurrent.Semaphore;
 
-
-public class Elevator extends Thread{
+public class Elevator{
 	
 	public boolean rodando = true;
 	
 	public Rect rectOpen;
 	public Rect rectClosed;
+	private Floor[] floor;
+	private Person person;
 	
-
-	float speed = 800.0f;
-	private static boolean door = false;
+	float speed = 50.0f;
 	
-	Floor[] floor;
-	int floorCurrent = 0;
-	int floorDestiny = 0;
-	boolean existPerson = false;
-	int timer = 0;
-	Person person;
+	private int floorCurrent = 0;
+	private int floorDestiny = 0;
+	private boolean existPerson = false;
 	
+	public static Semaphore semaphore = new Semaphore(1);
+	
+	//Construtor
 	public Elevator(Floor[] floor)
 	{
 		rectOpen = new Rect(0,0,100,200);
 		rectClosed = new Rect(0,0,100,200);
-		
 		this.floor = floor;
 		
 	}
 	
-	public void run() 
+	//Update do Elevador
+	public void Update(float gameTime) 
 	{
-		
-		
-		
-		float gameTime = 0;
-		while(rodando) 
-		{
-			
-			long inicio = System.currentTimeMillis();
-			
-			Update(gameTime);
-			
-			long fim = System.currentTimeMillis();
-			gameTime = (float)(fim - inicio) * 0.001f;
-			
-			Draw();
-			
-		}
-		
+		VisitarAndar(gameTime);
 	}
 	
-	private void Update(float gameTime) 
-	{
-		
-		if(door == true)
-		{
-			SetAnimation(0,-1000);
-			
-			
-			
-		}else 
-		{
-			SetAnimation(-1000,0);
-			VistarAndar(gameTime);
-		}
-		
-		
-	}
-	
-	private void Draw() 
-	{
-		//Form.Paint(rectOpen);
-		//Form.Paint(rectClosed);
-	}
-	
-	
-	
-	private int Distance(int destiny, int current)
-	{
-		int distance = Math.abs(destiny - current);
-		return distance;
-	}
-	
-	private void SetAnimation(int open, int closed)
-	{
-		rectOpen.x = open;
-		rectClosed.x = closed;
-	}
-	
-
-	
+	//Região critica
 	public void ChangeDestiny(Person person)
 	{
-		if(this.person == null)
-		{
-			this.person = person;
-			System.out.println("Person: "+ person.id + "FloorDestiny: " + person.floorDestiny);
-			floorDestiny = this.person.floor.numberFloor;
-			FecharPorta();
-		}else if(this.person != person)
-		{
-			this.person = person;
-			System.out.println("Person: "+ person.id + "FloorDestiny: " + person.floorDestiny);
-			floorDestiny = this.person.floor.numberFloor;
-			FecharPorta();
-		}else {
-			System.out.println("REPETIDO" );
-			this.person.semaphore.release();
+		try {
+			semaphore.acquire();
+		} catch (InterruptedException e) {
+			
+			e.printStackTrace();
 		}
+		if(existPerson == false )
+		{
+			
+			if(person.free)
+			{
+				this.person = person;
+				existPerson = true;
+				floorDestiny = this.person.floor.numberFloor;
+				System.out.println("Person: " + person.id + " PersonDestiny: " + person.floorDestiny);
+			}
+		}
+		semaphore.release();
+		
 	}
 	
+	//Metodo que abre a porta e adiciona um destino para o elevador
 	private void AbrirPorta()
 	{
 		
-		door = true;
 		floorCurrent = floorDestiny;
 		
 		if(person != null)
 		{
-		
-			
 			if(floorCurrent == person.floorDestiny)
 			{
-				
-				existPerson = false;
+				person.rect.x = 40;
 				person.free = false;
-				person.rect.x = 40.0f;
-				person.rect.y = this.rectClosed.y;
-				person.semaphore.release();
-				
-				System.out.println("Release: " + person.free + " Id: "+ person.id);
+				person = null;
+				existPerson = false;
 				
 			}else {
-				if(!existPerson)
+				if(floorCurrent == person.floor.numberFloor && existPerson)
 				{
+					
 					floorDestiny = person.floorDestiny;
-					existPerson = true;
-					person.rect.x = -100;
-					FecharPorta();
+					
+					
+				}else {
+					floorCurrent = person.floor.numberFloor;
 				}
+				
 			}
-		
 		}
-			
-	}
-	private void FecharPorta()
-	{
-		door = false;
 		
 	}
-	private void VistarAndar(float gameTime)
+	
+	//Metodo utilizado para seguir o andar destinado
+	private void VisitarAndar(float gameTime)
 	{
-		if( Distance(floor[floorDestiny].positionY , floor[floorCurrent].positionY) > 0 && Distance(floor[floorDestiny].positionY , (int)rectClosed.y) > 10 && person.free == true)
+		if( Distance(floor[floorDestiny].rect.y , floor[floorCurrent].rect.y) > 0 && Distance(floor[floorDestiny].rect.y , (int)rectClosed.y) > 10 )
 		{
-			
-				if(rectClosed.y < floor[floorDestiny].positionY) 
+			SetAnimation(-1000,0);
+				if(rectClosed.y < floor[floorDestiny].rect.y) 
 				{
 					rectClosed.y += speed  * gameTime;
 					rectOpen.y +=  speed  * gameTime;
+					
+					if(this.person != null)
+					{
+						if(floorDestiny == this.person.floorDestiny)
+						{
+							this.person.rect.y = rectClosed.y;
+							this.person.rect.x = 40.0f;
+						}
+					}
 					
 				}else 
 				{
 					rectClosed.y -= speed  * gameTime;
 					rectOpen.y -=  speed  * gameTime;
 					
+					if(this.person != null)
+					{
+						if(floorDestiny == this.person.floorDestiny)
+						{
+							this.person.rect.y = rectClosed.y;
+							this.person.rect.x = 40.0f;
+						}
+					}
+					
+					
 				}
-		}else 
+				
+		}
+		else 
 		{
+			//System.out.println("Saiuuu");
+			SetAnimation(0,-1000);
 			AbrirPorta();
+			
 		}
 	}
 	
+	//Metodo utilizado para calcular a distancia entre um andar e outro
+	private int Distance(float destiny, float current)
+	{
+		int distance = Math.abs((int)destiny - (int)current);
+		return distance;
+	}
+	
+	//Metodo para trocar a imagem de fechado e aberto do elevador
+	private void SetAnimation(int open, int closed)
+	{
+		rectOpen.x = open;
+		rectClosed.x = closed;
+	}
 	
 }

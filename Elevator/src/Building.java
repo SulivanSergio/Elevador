@@ -7,7 +7,7 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 
-public class Form extends GameLoop{
+public class Building extends GameLoop{
 	
 	public static JFrame window;
 	public static Point screen = new Point(700,700);
@@ -21,36 +21,43 @@ public class Form extends GameLoop{
 	
 	Random random = new Random();
 	
-	public Form() {
+	
+	//predio utilizado para gerar elevador, andares e pesssoas
+	//tambem foi utilizado com um GameLoop para desenhar os quadrados
+	public Building() {
 		
 	}
 	
+	//Start do GameLoop
 	public void Start() {
+		
 		screen = new Point(700,700);
 		
+		//criação da janela
 		CreateWindow();
 		
+		//inicialização das variaveis
 		timeMAX = 10;
-		totalFloor = 2;
+		totalFloor = 3;
 		random = new Random();
-		
 		floor = new Floor[totalFloor];
 		
 		
+		//inicialização dos andares
 		for(int i = 0; i < floor.length ; i++)
 		{
 			floor[i] = new Floor(i,30 +(screen.y/totalFloor) * i);
-			System.out.println(floor[i].numberFloor + " : "+ floor[i].positionY);
+			System.out.println(floor[i].numberFloor + " : "+ floor[i].rect.y);
 		}
 		
 		
 		
+		//inicialização do elevador
 		elevator = new Elevator(floor);
-		elevator.start();
 		
 
-		person = new Person[6];
-		
+		//inicialização das pessoas
+		person = new Person[5];
 		for(int i = 0; i < person.length ; i++)
 		{
 			person[i] = new Person(i,RandomNew(i),floor[i%totalFloor],elevator);
@@ -59,7 +66,9 @@ public class Form extends GameLoop{
 		}
 		
 		
+		
 	}
+	//metodo utilizado para chamar o destino da pessoa sem que seja o proprio andar
 	public int RandomNew(int id) {
 		
 		int aux = random.nextInt(totalFloor);
@@ -73,10 +82,15 @@ public class Form extends GameLoop{
 		return aux;
 	}
 	
+	//Update do GameLoop
+	public void Update(float gameTime)
+	{
+		elevator.Update(gameTime);
+	}
+	
+	//Metodo que desenha do GameLoop
 	public void Draw() {
 		//System.out.print("a");
-		
-		
 		for(int i = 0; i < floor.length ; i++)
 		{
 			Paint(floor[i].rect,Color.black);
@@ -91,8 +105,7 @@ public class Form extends GameLoop{
 		Paint(elevator.rectClosed, Color.red);
 	}
 	
-	
-	
+	//Criação da janela
 	private void CreateWindow() 
 	{
 		window = new JFrame();
@@ -104,10 +117,12 @@ public class Form extends GameLoop{
 		
 	}
 	
+	//Metodo que pinta e limpa a janela
 	public void Paint(Rect rect, Color color)
 	{
 		time += 0.01f;
 		Graphics g = window.getGraphics();
+		
 		if(time > timeMAX)
 		{
 			time =0;
@@ -115,8 +130,6 @@ public class Form extends GameLoop{
 			g.setColor(Color.GRAY);
 			g.fillRect(0,0,screen.x,screen.y);
 		}
-		
-		
 		
 		g.setColor(color);
 		g.fillRect((int)rect.x,(int)rect.y,(int)rect.width,(int)rect.height);
